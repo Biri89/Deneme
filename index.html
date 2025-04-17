@@ -1,116 +1,111 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ofis Forumu</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ofis Forum - Giriş / Kayıt</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-      color: #212529;
       margin: 0;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #181828;
+      color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    .forum {
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    .box {
+      background: #2b2b3c;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 400px;
     }
-    .kutu {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 5px;
+    h2 {
+      text-align: center;
     }
-    textarea, input {
+    input[type="text"], input[type="password"] {
       width: 100%;
       padding: 10px;
-      margin: 5px 0;
-      border: 1px solid #ccc;
+      margin-top: 10px;
+      border: none;
       border-radius: 5px;
     }
     button {
-      padding: 10px 20px;
-      background-color: #007bff;
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
+    .switch {
+      margin-top: 10px;
+      text-align: center;
+      cursor: pointer;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
-  <div class="forum">
-    <h2>Bizimle Paylaş</h2>
-    <input type="text" id="kullanici" placeholder="Adınız (takma ad olabilir)" />
-    <select id="kategori">
-      <option value="Genel">Genel</option>
-      <option value="Şikayet">Şikayet</option>
-      <option value="Mizah">Mizah</option>
-      <option value="Öneri">Öneri</option>
-    </select>
-    <textarea id="mesaj" placeholder="Mesajınızı yazın..."></textarea>
-    <input type="text" id="resim" placeholder="(Opsiyonel) Görsel bağlantısı" />
-    <button onclick="mesajGonder()">Paylaş</button>
-    <div id="mesajlar"></div>
+  <div class="box">
+    <h2 id="form-title">Giriş Yap</h2>
+    <input type="text" id="email" placeholder="Kullanıcı Adı">
+    <input type="password" id="password" placeholder="Parola">
+    <input type="password" id="confirm-password" placeholder="Parola Tekrar" style="display:none;">
+    <button id="submit-btn">Giriş Yap</button>
+    <div class="switch" onclick="toggleForm()" id="toggle-text">Hesabın yok mu? Kayıt ol</div>
   </div>
 
   <script>
-    const supabase = supabase.createClient("https://ldowvfzrnchhgrviaimd.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn...");
+    // Eğer Supabase kullanacaksan bu bilgileri doldur
+    const supabase = supabase.createClient(
+      "https://SENIN-URL.supabase.co", // Supabase URL
+      "PUBLIC-ANON-KEY"                // Supabase anon public key
+    );
 
-    async function mesajGonder() {
-      const kullanici = document.getElementById("kullanici").value;
-      const mesaj = document.getElementById("mesaj").value;
-      const kategori = document.getElementById("kategori").value;
-      const resim = document.getElementById("resim").value;
+    let isRegister = false;
 
-      if (!kullanici || !mesaj) {
-        alert("Lütfen adınızı ve mesajınızı girin.");
-        return;
-      }
+    function toggleForm() {
+      isRegister = !isRegister;
+      document.getElementById('form-title').innerText = isRegister ? 'Kayıt Ol' : 'Giriş Yap';
+      document.getElementById('submit-btn').innerText = isRegister ? 'Kayıt Ol' : 'Giriş Yap';
+      document.getElementById('toggle-text').innerText = isRegister ? 'Zaten hesabın var mı? Giriş yap' : 'Hesabın yok mu? Kayıt ol';
+      document.getElementById('confirm-password').style.display = isRegister ? 'block' : 'none';
+    }
 
-      const { data, error } = await supabase
-        .from("mesajlar")
-        .insert([{
-          kullanici: kullanici,
-          mesaj: mesaj,
-          kategori: kategori,
-          resim: resim
-        }]);
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
 
-      if (error) {
-        alert("Bir hata oluştu: " + error.message);
+      if (isRegister) {
+        const confirm = document.getElementById('confirm-password').value;
+        if (password !== confirm) {
+          alert('Parolalar uyuşmuyor!');
+          return;
+        }
+        alert(`Simülasyon: ${email} kullanıcı adıyla kayıt olunacak.`);
+        // Supabase aktifse şunu kullan:
+        // const { error } = await supabase.auth.signUp({ email, password });
+        // if (error) return alert(error.message);
+        // alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+        toggleForm();
       } else {
-        document.getElementById("mesaj").value = "";
-        document.getElementById("resim").value = "";
-        mesajlariGetir();
+        alert(`Simülasyon: ${email} ile giriş yapılacak.`);
+        // Supabase aktifse şunu kullan:
+        // const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // if (error) return alert('Giriş başarısız: ' + error.message);
+        // alert('Giriş başarılı! Hoş geldiniz.');
       }
-    }
+    });
 
-    async function mesajlariGetir() {
-      const { data, error } = await supabase
-        .from("mesajlar")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (data) {
-        const container = document.getElementById("mesajlar");
-        container.innerHTML = "";
-        data.forEach((m) => {
-          const el = document.createElement("div");
-          el.className = "kutu";
-          el.innerHTML = `<strong>${m.kategori}</strong> - <em>${m.kullanici}</em><br><p>${m.mesaj}</p>${m.resim ? `<img src='${m.resim}' style='max-width:100%' />` : ""}`;
-          container.appendChild(el);
-        });
-      }
-    }
-
-    mesajlariGetir();
+    // Tarayıcıdan erişilebilmesi için fonksiyonu global yap
+    window.toggleForm = toggleForm;
   </script>
 </body>
 </html>
