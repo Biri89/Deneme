@@ -63,10 +63,9 @@
   </div>
 
   <script>
-    // Eğer Supabase kullanacaksan bu bilgileri doldur
     const supabase = supabase.createClient(
-      "https://SENIN-URL.supabase.co", // Supabase URL
-      "PUBLIC-ANON-KEY"                // Supabase anon public key
+      "https://tdnctptmlzpnwtwsrfzc.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkbmN0cHRtbHpwbnd0d3NyZnpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODcyMzYsImV4cCI6MjA2MDQ2MzIzNn0.rqsr0KIeVJbxMNNtCqCaHQ0A763pPh71Zk92eLLAN3Q"
     );
 
     let isRegister = false;
@@ -83,28 +82,29 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
 
+      if (!email || !password) {
+        alert('Lütfen tüm alanları doldurun.');
+        return;
+      }
+
       if (isRegister) {
         const confirm = document.getElementById('confirm-password').value;
         if (password !== confirm) {
           alert('Parolalar uyuşmuyor!');
           return;
         }
-        alert(`Simülasyon: ${email} kullanıcı adıyla kayıt olunacak.`);
-        // Supabase aktifse şunu kullan:
-        // const { error } = await supabase.auth.signUp({ email, password });
-        // if (error) return alert(error.message);
-        // alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) return alert(error.message);
+        alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
         toggleForm();
       } else {
-        alert(`Simülasyon: ${email} ile giriş yapılacak.`);
-        // Supabase aktifse şunu kullan:
-        // const { error } = await supabase.auth.signInWithPassword({ email, password });
-        // if (error) return alert('Giriş başarısız: ' + error.message);
-        // alert('Giriş başarılı! Hoş geldiniz.');
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return alert('Giriş başarısız: ' + error.message);
+        alert('Giriş başarılı! Hoş geldiniz.');
+        // location.href = \"anasayfa.html\"; // Girişten sonra yönlendirme
       }
     });
 
-    // Tarayıcıdan erişilebilmesi için fonksiyonu global yap
     window.toggleForm = toggleForm;
   </script>
 </body>
