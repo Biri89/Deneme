@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ofis Forumu</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #212529;
+      margin: 0;
+      padding: 20px;
+    }
+    .forum {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .kutu {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="forum">
+    <h2>Düşüncelerini Bizimle Paylaş</h2>
+    <input type="text" id="kullanici" placeholder="Adınız (takma ad olabilir)" />
+    <select id="kategori">
+      <option value="Genel">Genel</option>
+      <option value="Şikayet">Şikayet</option>
+      <option value="Mizah">Mizah</option>
+      <option value="Öneri">Öneri</option>
+    </select>
+    <textarea id="mesaj" placeholder="Mesajınızı yazın..."></textarea>
+    <input type="text" id="resim" placeholder="(Opsiyonel) Görsel bağlantısı" />
+    <button onclick="mesajGonder()">Paylaş</button>
+    <div id="mesajlar"></div>
+  </div>
+
+  <script>
+    const supabase = supabase.createClient("https://ldowvfzrnchhgrviaimd.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn...");
+
+    async function mesajGonder() {
+      const kullanici = document.getElementById("kullanici").value;
+      const mesaj = document.getElementById("mesaj").value;
+      const kategori = document.getElementById("kategori").value;
+      const resim = document.getElementById("resim").value;
+
+      if (!kullanici || !mesaj) {
+        alert("Lütfen adınızı ve mesajınızı girin.");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("mesajlar")
+        .insert([{
+          kullanici: kullanici,
+          mesaj: mesaj,
+          kategori: kategori,
+          resim: resim
+        }]);
+
+      if (error) {
+        alert("Bir hata oluştu: " + error.message);
+      } else {
+        document.getElementById("mesaj").value = "";
+        document.getElementById("resim").value = "";
+        mesajlariGetir();
+      }
+    }
+
+    async function mesajlariGetir() {
+      const { data, error } = await supabase
+        .from("mesajlar")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (data) {
+        const container = document.getElementById("mesajlar");
+        container.innerHTML = "";
+        data.forEach((m) => {
+          const el = document.createElement("div");
+          el.className = "kutu";
+          el.innerHTML = `<strong>${m.kategori}</strong> - <em>${m.kullanici}</em><br><p>${m.mesaj}</p>${m.resim ? `<img src='${m.resim}' style='max-width:100%' />` : ""}`;
+          container.appendChild(el);
+        });
+      }
+    }
+
+    mesajlariGetir();
+  </script>
+</body>
+</html>
